@@ -1,6 +1,6 @@
 from dotenv import load_dotenv
 
-load_dotenv()  # must run before create_app() so OPENAI_API_KEY is in os.environ
+load_dotenv()  
 
 from app import create_app
 
