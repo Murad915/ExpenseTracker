@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+
+{% block title %}Analytics — ExpenseTracker{% endblock %}
+
+{% block content %}
+
+<!-- Page header -->
+<div class="mb-6">
+    <h1 class="text-xl font-semibold text-slate-100">Analytics</h1>
+    <p class="text-sm text-slate-500 mt-0.5">An overview of your spending patterns</p>
+</div>
+
+{% if stats %}
+
+<!-- Stat cards -->
+<div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-5">
+    <div class="bg-slate-900 rounded-2xl border border-slate-800/60 shadow-xl p-5">
+        <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3">Total Spent</p>
+        <p class="text-2xl font-bold text-slate-100 font-mono tracking-tight">
+            ${{ "%.2f" | format(stats.total_spent) }}
+        </p>
+        <p class="text-xs text-slate-600 mt-1.5">all time</p>
+    </div>
+    <div class="bg-slate-900 rounded-2xl border border-slate-800/60 shadow-xl p-5">
+        <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3">Transactions</p>
+        <p class="text-2xl font-bold text-slate-100">{{ stats.expense_count }}</p>
+        <p class="text-xs text-slate-600 mt-1.5">recorded</p>
+    </div>
+    <div class="bg-slate-900 rounded-2xl border border-slate-800/60 shadow-xl p-5">
+        <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3">Categories</p>
+        <p class="text-2xl font-bold text-slate-100">{{ stats.category_count }}</p>
+        <p class="text-xs text-slate-600 mt-1.5">unique</p>
+    </div>
+    <div class="bg-slate-900 rounded-2xl border border-emerald-500/20 shadow-xl p-5
+                bg-gradient-to-br from-slate-900 to-emerald-950/30">
+        <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3">Top Category</p>
+        <p class="text-sm font-bold text-emerald-400 leading-snug truncate">{{ stats.top_category }}</p>
+        <p class="text-xs text-slate-600 mt-1.5">most spent</p>
+    </div>
+</div>
+
+<!-- Chart card -->
+<div class="bg-slate-900 rounded-2xl border border-slate-800/60 shadow-xl p-6">
+    <div class="mb-5">
+        <h2 class="text-sm font-semibold text-slate-200">Spending Breakdown</h2>
+        <p class="text-xs text-slate-500 mt-0.5">
+            All-time distribution across
+            {{ stats.category_count }} categor{{ 'ies' if stats.category_count != 1 else 'y' }}
+            and {{ stats.expense_count }} transaction{{ 's' if stats.expense_count != 1 else '' }}
+        </p>
+    </div>
+    <div id="category-chart" class="w-full" style="height: 440px;"></div>
+</div>
+
+{% else %}
+
+<div class="flex items-center justify-center min-h-[65vh]">
+    <div class="text-center">
+        <div class="w-14 h-14 rounded-2xl bg-slate-900 border border-slate-800/60 flex items-center
+                    justify-center mx-auto mb-5">
+            <span class="text-slate-600 font-mono font-bold text-xl">$</span>
+        </div>
+        <p class="text-slate-300 font-semibold mb-1">No data to visualise yet</p>
+        <p class="text-slate-500 text-sm mb-6">Add some expenses to see your spending breakdown</p>
+        <a href="{{ url_for('main.index') }}"
+           class="inline-flex items-center px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500
+                  text-white text-sm font-semibold transition-colors shadow-lg shadow-emerald-900/30">
+            Add your first expense
+        </a>
+    </div>
+</div>
+
+{% endif %}
+
+{% endblock %}
+
+{% block scripts %}
+{% if chart_json %}
+<script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+<script>
+    const figure = {{ chart_json | safe }};
+    Plotly.newPlot('category-chart', figure.data, figure.layout, {
+        responsive: true,
+        displayModeBar: false,
+    });
+</script>
+{% endif %}
+{% endblock %}
